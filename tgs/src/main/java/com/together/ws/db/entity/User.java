@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.math.BigInteger;
 
 @Entity
-@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"phone"}))
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"phone", "family"}))
 public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -22,15 +22,19 @@ public class User {
     @Column
     private String sessionId;
 
+    @Column
+    private String state;
+
     @ManyToOne
     @JoinColumn(name = "family_id")
     private Family family;
 
-    public User(String userId, String name, String phone, Family family) {
+    public User(String userId, String name, String phone, Family family, String state) {
         this.userId = userId;
         this.name = name;
         this.phone = phone;
         this.family = family;
+        this.state = state;
     }
 
     public String getUserId() {
@@ -79,5 +83,13 @@ public class User {
 
     public void setFamily(Family family) {
         this.family = family;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

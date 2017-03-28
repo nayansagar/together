@@ -1,22 +1,28 @@
 package com.together.ws.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import com.together.ws.exception.InvalidFamilyException;
+import com.together.ws.service.UserService;
 import com.together.ws.utils.JSONUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.util.StringUtils;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
+import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.*;
 
 @ServerEndpoint(value = "/chat")
 public class SocketServer {
+
+	private UserService userService;
+
+	public SocketServer(UserService userService){
+		this.userService = userService;
+	}
 
 	// set to store all the live sessions
 	private static final Set<Session> sessions = Collections
@@ -26,6 +32,8 @@ public class SocketServer {
 	private static final HashMap<String, String> nameSessionPair = new HashMap<String, String>();
 
 	private JSONUtils jsonUtils = new JSONUtils();
+
+	private ObjectMapper objectMapper = new ObjectMapper();
 
 	// Getting query params
 	public static Map<String, String> getQueryMap(String query) {
@@ -50,37 +58,38 @@ public class SocketServer {
 
 		Map<String, String> queryParams = getQueryMap(session.getQueryString());
 
-		String name = "";
+		String userId = "";
 
-		if (queryParams.containsKey("name")) {
-
-			// Getting client name via query param
-			name = queryParams.get("name");
+		if (!queryParams.containsKey("user_id") || StringUtils.isEmpty(queryParams.get("user_id"))) {
 			try {
-				name = URLDecoder.decode(name, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+				session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "user_id query param missing"));
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
-
-			// Mapping client name and session id
-			nameSessionPair.put(session.getId(), name);
 		}
 
-		// Adding session to session list
-		sessions.add(session);
+		try {
+			userService.updateSession(userId, session.getId());
+		}catch (InvalidFamilyException e){
+			try {
+				session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "user_id "+userId+" invalid"));
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+
+		List<Map<String, Object>> messages = userService.getPendingMessages(userId);
 
 		try {
-			// Sending session id to the client that just connected
-			session.getBasicRemote().sendText(
-					jsonUtils.getClientDetailsJson(session.getId(),
-							"Your session details"));
+			String responseJson = objectMapper.writeValueAsString(messages);
+			session.getBasicRemote().sendText(responseJson);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		// Notifying all the clients about new person joined
-		sendMessageToAll(session.getId(), name, " joined conversation!", true,
-				false);
+		userService.removePendingMessages(userId);
 
 	}
 
@@ -115,19 +124,7 @@ public class SocketServer {
 	 * */
 	@OnClose
 	public void onClose(Session session) {
-
-		System.out.println("Session " + session.getId() + " has ended");
-
-		// Getting the client name that exited
-		String name = nameSessionPair.get(session.getId());
-
-		// removing the session from sessions list
-		sessions.remove(session);
-
-		// Notifying all the clients about person exit
-		sendMessageToAll(session.getId(), name, " left conversation!", false,
-				true);
-
+		
 	}
 
 	/**
