@@ -26,11 +26,10 @@ public class User {
     @JoinColumn(name = "family_id")
     private Family family;
 
-    public User(String userId, String name, String phone, String sessionId, Family family) {
+    public User(String userId, String name, String phone, Family family) {
         this.userId = userId;
         this.name = name;
         this.phone = phone;
-        this.sessionId = sessionId;
         this.family = family;
     }
 

@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.Map;
@@ -25,10 +22,10 @@ public class UserController {
     public ResponseEntity<?> createUser(@RequestBody Map<String, String> userData){
         String name = userData.get("name");
         String phone = userData.get("phone");
-        String familyId = userData.get("familyId");
+        String familyId = userData.get("family");
 
-        if(StringUtils.isEmpty(name) || StringUtils.isEmpty(phone) || StringUtils.isEmpty(familyId)){
-            return new ResponseEntity<Object>("Mandatory data missing (name/phone/familyId)", HttpStatus.BAD_REQUEST);
+        if(StringUtils.isEmpty(name) || StringUtils.isEmpty(phone)){
+            return new ResponseEntity<Object>("Mandatory data missing (name/phone)", HttpStatus.BAD_REQUEST);
         }
         String userId;
         try {
@@ -37,5 +34,15 @@ public class UserController {
             return new ResponseEntity<Object>("Invalid family ID", HttpStatus.BAD_REQUEST);
         }
         return ResponseEntity.created(URI.create(userId)).build();
+    }
+
+    @RequestMapping(path = "/{user_id}",method = RequestMethod.PATCH)
+    public ResponseEntity<?> updateFamily(@PathVariable("user_id") String userId, @RequestBody Map<String, String> userData){
+        String familyId = userData.get("family");
+        if(StringUtils.isEmpty(familyId)){
+            return new ResponseEntity<Object>("Mandatory data missing (family)", HttpStatus.BAD_REQUEST);
+        }
+        userService.updateFamily(userId, familyId);
+        return ResponseEntity.ok().build();
     }
 }
