@@ -11,35 +11,37 @@ public class PendingMessage {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private BigInteger id;
 
-    @Column
-    private User user;
+    @Column(name = "user_id")
+    private String userId;
 
-    @Column
-    private User sender;
+    @Column(name = "sender_id")
+    private String senderId;
 
     @Column
     private String message;
 
-    public PendingMessage(User user, User sender, String message) {
-        this.user = user;
-        this.sender = sender;
+    public PendingMessage(){}
+
+    public PendingMessage(String user, String sender, String message) {
+        this.userId = user;
+        this.senderId = sender;
         this.message = message;
     }
 
-    public User getUser() {
-        return user;
+    public String getUser() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUser(String user) {
+        this.userId = user;
     }
 
-    public User getSender() {
-        return sender;
+    public String getSender() {
+        return senderId;
     }
 
-    public void setSender(User sender) {
-        this.sender = sender;
+    public void setSender(String sender) {
+        this.senderId = sender;
     }
 
     public String getMessage() {

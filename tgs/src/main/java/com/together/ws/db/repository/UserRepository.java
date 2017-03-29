@@ -1,5 +1,6 @@
 package com.together.ws.db.repository;
 
+import com.together.ws.db.entity.Family;
 import com.together.ws.db.entity.User;
 import org.springframework.data.repository.CrudRepository;
 
@@ -11,11 +12,17 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     List<User> findByPhone(String phone);
 
-    List<User> findByFamily(String familyId);
+    List<User> findByFamilyId(String familyId);
 
     List<User> findByPhoneAndState(String phone, String state);
 
-    User findByUserIdAndFamily(String userId, String familyId);
+    User findByUserIdAndFamilyId(String userId, String familyId);
 
-    User findByUserIdAndFamilyAndState(String userId, String familyId, String state);
+    User findByUserIdAndFamilyIdAndState(String userId, String familyId, String state);
+
+    List<User> findBySessionId(String sessionId);
+
+    User findBySessionIdAndFamilyId(String sessionId, String familyId);
+
+    List<User> findByFamilyIdAndState(String familyId, String state);
 }

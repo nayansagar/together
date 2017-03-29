@@ -50,7 +50,7 @@ public class UserController {
         }
 
         String familyId = familyService.createFamily(familyName);
-
+        userService.joinFamily(userId, familyId);
         userService.inviteUsersToFamily(userId, familyId, memberInfo);
 
         return ResponseEntity.created(URI.create(familyId)).build();

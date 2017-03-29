@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface PendingMessagesRepository extends CrudRepository<PendingMessage, Long> {
 
-    List<PendingMessage> findByUser(String userId);
+    List<PendingMessage> findByUserId(String userId);
 }

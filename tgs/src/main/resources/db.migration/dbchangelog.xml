@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1" author="sagar">
+
+        <createTable tableName="users">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR"/>
+            <column name="name" type="VARCHAR"/>
+            <column name="phone" type="VARCHAR"/>
+            <column name="state" type="VARCHAR"/>
+            <column name="session_id" type="VARCHAR"/>
+            <column name="family_id" type="VARCHAR"/>
+            <column name="created_date" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="session_state_date" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <createTable tableName="families">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="family_id" type="VARCHAR"/>
+            <column name="name" type="VARCHAR"/>
+        </createTable>
+
+        <createTable tableName="relationships">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id1" type="VARCHAR"/>
+            <column name="user_id2" type="VARCHAR"/>
+            <column name="relationship" type="VARCHAR"/>
+        </createTable>
+
+        <createTable tableName="pending_messages">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR"/>
+            <column name="sender_id" type="VARCHAR"/>
+            <column name="message" type="VARCHAR"/>
+        </createTable>
+
+    </changeSet>
+
+</databaseChangeLog>

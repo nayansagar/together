@@ -4,13 +4,13 @@ import javax.persistence.*;
 import java.math.BigInteger;
 
 @Entity
-@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"phone", "family"}))
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"phone", "family_id"}))
 public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private BigInteger id;
 
-    @Column
+    @Column(name = "user_id")
     private String userId;
 
     @Column
@@ -19,21 +19,22 @@ public class User {
     @Column
     private String phone;
 
-    @Column
+    @Column(name = "session_id")
     private String sessionId;
 
     @Column
     private String state;
 
-    @ManyToOne
-    @JoinColumn(name = "family_id")
-    private Family family;
+    @Column(name = "family_id")
+    private String familyId;
 
-    public User(String userId, String name, String phone, Family family, String state) {
+    public User(){}
+
+    public User(String userId, String name, String phone, String familyId, String state) {
         this.userId = userId;
         this.name = name;
         this.phone = phone;
-        this.family = family;
+        this.familyId = familyId;
         this.state = state;
     }
 
@@ -77,12 +78,12 @@ public class User {
         this.sessionId = sessionId;
     }
 
-    public Family getFamily() {
-        return family;
+    public String getFamily() {
+        return familyId;
     }
 
-    public void setFamily(Family family) {
-        this.family = family;
+    public void setFamily(String family) {
+        this.familyId = family;
     }
 
     public String getState() {

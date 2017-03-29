@@ -12,15 +12,13 @@ public class Family {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private BigInteger id;
 
-    @Column
+    @Column(name = "family_id")
     private String familyId;
 
     @Column
     private String name;
 
-    @Column
-    @OneToMany(mappedBy="family", cascade=CascadeType.ALL)
-    private List<User> users;
+    public Family(){}
 
     public Family(String familyId, String name) {
         this.familyId = familyId;
@@ -41,13 +39,5 @@ public class Family {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<User> users) {
-        this.users = users;
     }
 }
