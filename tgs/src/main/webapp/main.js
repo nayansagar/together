@@ -6,7 +6,7 @@ var name = '';
 
 // socket connection url and port
 var socket_url = 'localhost';
-var port = '8080';
+var port = '8181';
 
 $(document).ready(function() {
 
