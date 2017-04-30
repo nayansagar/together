@@ -1,5 +1,7 @@
 package com.together.ws.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.together.ws.db.entity.Family;
 import com.together.ws.db.entity.PendingMessage;
 import com.together.ws.db.entity.Relationship;
@@ -10,6 +12,8 @@ import com.together.ws.db.repository.RelationshipRepository;
 import com.together.ws.db.repository.UserRepository;
 import com.together.ws.exception.InvalidFamilyException;
 import com.together.ws.utils.SessionCache;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -108,10 +112,11 @@ public class UserService {
         }
 
         for(User user : users){
-            user.setSessionId(session.getId());
+            user.setSessionId(session == null ? null : session.getId());
             userRepository.save(user);
         }
 
+        if(session != null)
         sessionCache.addSession(session.getId(), session);
 
     }
@@ -141,13 +146,10 @@ public class UserService {
         return null;
     }
 
-    public void handleMessage(Map message, String sessionId) {
+    public void handleMessage(Map message, String sessionId) throws JsonProcessingException {
         String familyId = (String) message.get("family");
-        String messageBody = (String) message.get("body");
-        if(StringUtils.isEmpty(familyId)){
-            throw new InvalidFamilyException();
-        }
         User user = userRepository.findBySessionIdAndFamilyId(sessionId, familyId);
+        String msgToSend = createMessageToSend(message, user.getName());
 
         List<User> familyMembers = userRepository.findByFamilyIdAndState(familyId, "JOINED");
 
@@ -158,16 +160,43 @@ public class UserService {
 
             if(!StringUtils.isEmpty(member.getSessionId())){
                 Session session = sessionCache.getSession(member.getSessionId());
-                try {
-                    session.getBasicRemote().sendText(messageBody);
-                } catch (IOException e) {
-                    addPendingMessage(member, user, messageBody);
+                if(session == null){
+                    addPendingMessage(member, user, msgToSend);
+                }else {
+                    try {
+                        session.getBasicRemote().sendText(msgToSend);
+                    } catch (IOException e) {
+                        addPendingMessage(member, user, msgToSend);
+                    }
                 }
             }else{
-                addPendingMessage(member, user, messageBody);
+                addPendingMessage(member, user, msgToSend);
             }
 
         }
+    }
+
+    private String createMessageToSend(Map message, String sender) throws JsonProcessingException {
+        String familyId = (String) message.get("family");
+        String area = (String) message.get("area");
+        String type = (String) message.get("type");
+        String encodedBody = (String)message.get("body");
+
+        if(StringUtils.isEmpty(familyId)){
+            throw new InvalidFamilyException();
+        }
+
+        Map<String, Object> msgToSend = new HashMap<String, Object>();
+        msgToSend.put("family", familyId);
+        msgToSend.put("message", encodedBody);
+        msgToSend.put("area", area);
+        msgToSend.put("sender", sender);
+        msgToSend.put("type", type);
+        msgToSend.put("sentAt", DateTime.now().withZone(DateTimeZone.UTC).toString());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String msgStringToSend = objectMapper.writeValueAsString(msgToSend);
+        return msgStringToSend;
     }
 
     private void addPendingMessage(User member, User sender, String message) {
