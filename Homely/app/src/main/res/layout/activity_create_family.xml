@@ -7,6 +7,7 @@
     tools:context="together.com.homely.CreateFamilyActivity">
 
     <TextView
+        android:id="@+id/name_family_text"
         android:text="@string/family_name_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -14,13 +15,16 @@
     <EditText
         android:id="@+id/family_name"
         android:hint="@string/family_name_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/name_family_text"/>
 
     <TextView
+        android:id="@+id/add_members_text"
         android:text="@string/create_family_header"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/family_name"/>
 
     <Button
         android:layout_width="match_parent"
@@ -30,6 +34,7 @@
         android:textColor="#1e8eb8"
         android:onClick="inviteSpouse"
         android:layout_centerInParent="true"
+        android:layout_below="@id/add_members_text"
         />
 
     <Button
@@ -40,6 +45,7 @@
         android:textColor="#1e8eb8"
         android:onClick="inviteFather"
         android:layout_centerInParent="true"
+        android:layout_below="@id/invite_spouse"
         />
 
     <Button
@@ -50,6 +56,7 @@
         android:textColor="#1e8eb8"
         android:onClick="inviteMother"
         android:layout_centerInParent="true"
+        android:layout_below="@id/invite_father"
         />
 
     <Button
@@ -60,6 +67,7 @@
         android:textColor="#1e8eb8"
         android:onClick="inviteSon"
         android:layout_centerInParent="true"
+        android:layout_below="@id/invite_mother"
         />
 
     <Button
@@ -70,6 +78,7 @@
         android:textColor="#1e8eb8"
         android:onClick="inviteDaughter"
         android:layout_centerInParent="true"
+        android:layout_below="@id/invite_son"
         />
 
     <Button
@@ -80,6 +89,7 @@
         android:textColor="#1e8eb8"
         android:onClick="inviteBrother"
         android:layout_centerInParent="true"
+        android:layout_below="@id/invite_daughter"
         />
 
     <Button
@@ -90,6 +100,7 @@
         android:textColor="#1e8eb8"
         android:onClick="inviteSister"
         android:layout_centerInParent="true"
+        android:layout_below="@id/invite_brother"
         />
 
     <Button
@@ -100,5 +111,6 @@
         android:textColor="#1e8eb8"
         android:onClick="uploadInvites"
         android:layout_centerInParent="true"
+        android:layout_below="@id/invite_sister"
         />
 </RelativeLayout>

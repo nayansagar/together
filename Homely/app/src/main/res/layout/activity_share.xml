@@ -4,33 +4,27 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="together.com.homely.SignupActivity">
+    tools:context="together.com.homely.ShareActivity">
 
-    <EditText
-        android:hint="@string/user_identity"
-        android:id="@+id/user_identity"
+    <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/wall"
+        android:id="@+id/share_wall"
+        android:textColor="#1e8eb8"
+        android:onClick="shareToWall"
         android:layout_centerInParent="true"
-    />
-
-    <EditText
-        android:hint="@string/user_name"
-        android:id="@+id/user_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_below="@id/user_identity"
         />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/next"
-        android:id="@+id/action_next"
-        android:onClick="phoneNumberEntered"
-        android:layout_below="@id/user_name"
+        android:text="@string/family"
+        android:id="@+id/share_family"
+        android:textColor="#1e8eb8"
+        android:onClick="shareToFamily"
         android:layout_centerInParent="true"
-    />
+        android:layout_below="@id/share_wall"
+        />
 
 </RelativeLayout>

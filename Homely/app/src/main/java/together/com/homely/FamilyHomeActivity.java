@@ -1,19 +1,36 @@
 package together.com.homely;
 
 import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import together.com.homely.adapter.TabsPagerAdapter;
+import together.com.homely.fragments.AppsFragment;
+import together.com.homely.fragments.ChatsFragment;
+import together.com.homely.fragments.FeedFragment;
 import together.com.homely.utils.Constants;
 import together.com.homely.utils.MessageStore;
+import together.com.homely.utils.PersistenceUtils;
 import together.com.homely.utils.WSUtils;
 
 
-public class FamilyHomeActivity extends ActionBarActivity {
+public class FamilyHomeActivity extends ActionBarActivity implements ActionBar.TabListener,
+        FeedFragment.OnFragmentInteractionListener,
+        ChatsFragment.OnFragmentInteractionListener,
+        AppsFragment.OnFragmentInteractionListener {
 
-    private String userId;
+    private ViewPager viewPager;
+    private TabsPagerAdapter mAdapter;
+    private ActionBar actionBar;
+    private PersistenceUtils persistenceUtils;
+    // Tab titles
+    private String[] tabs = { "Feed", "Chats", "Apps" };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +39,30 @@ public class FamilyHomeActivity extends ActionBarActivity {
 
         MessageStore.initialize(this);
 
-        SharedPreferences prefs = getSharedPreferences(Constants.HOMELY, MODE_PRIVATE);
-        userId = prefs.getString("user_id", null);
-        WSUtils.initialize(userId);
+        persistenceUtils = new PersistenceUtils(this);
+        WSUtils.initialize(persistenceUtils.getUserId());
+
+        // Initilization
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        actionBar = getSupportActionBar();
+        mAdapter = new TabsPagerAdapter(getSupportFragmentManager());
+
+        viewPager.setAdapter(mAdapter);
+        actionBar.setHomeButtonEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        // Adding Tabs
+        for (String tab_name : tabs) {
+            actionBar.addTab(actionBar.newTab().setText(tab_name)
+                    .setTabListener(this));
+        }
+        viewPager.setOnPageChangeListener(
+                new ViewPager.SimpleOnPageChangeListener() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        viewPager.setCurrentItem(position);
+                    }
+                });
     }
 
 
@@ -48,5 +86,25 @@ public class FamilyHomeActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+        viewPager.setCurrentItem(tab.getPosition());
+    }
+
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+    }
+
+    @Override
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

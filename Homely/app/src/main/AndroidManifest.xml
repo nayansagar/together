@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="together.com.homely" >
+    package="together.com.homely">
 
     <!-- To access Google+ APIs: -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,19 +13,20 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity
             android:name=".SignupActivity"
-            android:label="@string/title_activity_signup" >
+            android:label="@string/title_activity_signup">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,15 +35,43 @@
         </activity>
         <activity
             android:name=".CreateFamilyActivity"
-            android:label="@string/title_activity_create_family" >
-        </activity>
+            android:label="@string/title_activity_create_family"></activity>
         <activity
             android:name=".JoinFamilyActivity"
-            android:label="@string/title_activity_join_family" >
-        </activity>
+            android:label="@string/title_activity_join_family"></activity>
         <activity
             android:name=".FamilyHomeActivity"
-            android:label="@string/title_activity_family_home" >
+            android:label="@string/title_activity_family_home"></activity>
+        <activity
+            android:name=".ShareActivity"
+            android:label="@string/title_activity_share">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
         </activity>
     </application>
 

@@ -2,12 +2,12 @@ package together.com.homely;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,23 +15,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
-import together.com.homely.utils.Constants;
-import together.com.homely.utils.HttpUtils;
+import together.com.homely.utils.PersistenceUtils;
 import together.com.homely.utils.WSUtils;
+import together.com.homely.utils.http.CreateFamilyTask;
 
 
 public class CreateFamilyActivity extends ActionBarActivity {
 
     private static final String ALLOWED_CHARACTERS ="0123456789qwertyuiopasdfghjklzxcvbnm";
-
-    private static String userId;
 
     private static final int PICK_CONTACT = 1000;
 
@@ -39,13 +37,14 @@ public class CreateFamilyActivity extends ActionBarActivity {
 
     private List<Map<String, String>> invitesList = new ArrayList<>();
 
+    private PersistenceUtils persistenceUtils;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_family);
 
-        SharedPreferences prefs = getSharedPreferences(Constants.HOMELY, MODE_PRIVATE);
-        userId = prefs.getString("user_id", null);
+        persistenceUtils = new PersistenceUtils(this);
     }
 
 
@@ -99,15 +98,19 @@ public class CreateFamilyActivity extends ActionBarActivity {
         inviteContact("sister");
     }
 
-    public void uploadInvites(){
+    public void uploadInvites(View view){
+        String userId = persistenceUtils.getUserId();
         EditText familyName = (EditText)findViewById(R.id.family_name);
         String fName = familyName.getText().toString();
         try {
-            HttpUtils.getInstance().createFamily(userId, fName, invitesList);
-            WSUtils.initialize(userId);
+            AsyncTask familyCreationMonitor = new CreateFamilyTask(userId, fName, invitesList).execute();
+            String familyId = (String) familyCreationMonitor.get();
+            persistenceUtils.storeFamilyId(familyId);
             Intent familyHomeIntent = new Intent(this, FamilyHomeActivity.class);
             startActivity(familyHomeIntent);
-        } catch (IOException e) {
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
             e.printStackTrace();
         }
     }

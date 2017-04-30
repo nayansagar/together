@@ -15,5 +15,7 @@ public class Constants {
         public static final String SENDER = "sender";
         public static final String MESSAGE = "message";
         public static final String SENT_TIME = "sentAt";
+        public static final String AREA = "area";
+        public static final String MSG_TYPE = "type";
     }
 }

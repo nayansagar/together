@@ -1,7 +1,7 @@
 package together.com.homely;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -12,17 +12,31 @@ import android.widget.EditText;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
-import together.com.homely.utils.Constants;
-import together.com.homely.utils.HttpUtils;
+import together.com.homely.utils.JSONUtils;
+import together.com.homely.utils.PersistenceUtils;
+import together.com.homely.utils.http.CreateUserTask;
 
 
 public class SignupActivity extends ActionBarActivity {
+
+    PersistenceUtils persistenceUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        persistenceUtils = new PersistenceUtils(this);
+
+        String userId = persistenceUtils.getUserId();
+
+        if(userId !=null && !userId.isEmpty()){
+            //WSUtils.initialize(userId);
+            Intent familyHomeIntent = new Intent(this, FamilyHomeActivity.class);
+            startActivity(familyHomeIntent);
+        }
     }
 
 
@@ -52,28 +66,29 @@ public class SignupActivity extends ActionBarActivity {
         EditText phone = (EditText)findViewById(R.id.user_identity);
         EditText userName = (EditText)findViewById(R.id.user_name);
         try {
-            Map<String, Object> response = HttpUtils.getInstance().createUser(
-                    phone.getText().toString(), userName.getText().toString());
+            String phoneNumberTxt = phone.getText().toString();
+            String userNameTxt = userName.getText().toString();
+            AsyncTask userCreationMonitor = new CreateUserTask(phoneNumberTxt, userNameTxt).execute();
+            Map<String, Object> response = (Map<String, Object>) userCreationMonitor.get();
 
-            storeUserId((String) response.get("user_id"));
-
+            String userId = (String) response.get("user_id");
+            persistenceUtils.storeUserId(userId);
+            //WSUtils.initialize(userId);
             ArrayList<Map<String, String>> invites = (ArrayList<Map<String, String>>) response.get("invites");
             if(invites != null && !invites.isEmpty()){
                 Intent joinFamilyIntent = new Intent(this, JoinFamilyActivity.class);
-                joinFamilyIntent.putExtra("invites", invites);
+                joinFamilyIntent.putExtra("invites", JSONUtils.getInstance().toJSONString(invites));
                 startActivity(joinFamilyIntent);
             }else {
                 Intent createFamilyIntent = new Intent(this, CreateFamilyActivity.class);
                 startActivity(createFamilyIntent);
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void storeUserId(String userId) {
-        SharedPreferences.Editor editor = getSharedPreferences(Constants.HOMELY, MODE_PRIVATE).edit();
-        editor.putString("user_id", userId);
-        editor.apply();
     }
 }
