@@ -6,6 +6,7 @@ import android.widget.BaseAdapter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -53,8 +54,7 @@ public class WSUtils extends WebSocketClient {
     public void onMessage(String message) {
         try {
             Map<String, Object> messageMap = OBJECT_MAPPER.readValue(message, Map.class);
-            String msgStr = (String) messageMap.get("message");
-            byte[] msgContent = Base64.decode(msgStr, Base64.DEFAULT);
+            String msgContent = (String) messageMap.get("message");
             MessageStore.getInstance().storeMessage(
                     (String)messageMap.get("family"),
                     (String)messageMap.get("area"),
@@ -70,19 +70,18 @@ public class WSUtils extends WebSocketClient {
         }
     }
 
-    public void send(String family, String area, byte[] body){
+    public void send(String family, String area, String body){
         send(family, area, body, "text");
     }
 
-    public void send(String family, String area, byte[] body, String messageType){
+    public void send(String family, String area, String body, String messageType){
 
         MessageStore.getInstance().storeMessage(family, area, "self",
                 GregorianCalendar.getInstance().toString(), messageType, body);
 
-        String base64Body = Base64.encodeToString(body, Base64.DEFAULT);
         Map<String, Object> message = new HashMap<String, Object>();
         message.put("family", family);
-        message.put("body", base64Body);
+        message.put("body", body);
         message.put("area", area);
         message.put("type", messageType);
         try {

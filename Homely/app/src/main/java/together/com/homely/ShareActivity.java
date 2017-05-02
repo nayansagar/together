@@ -2,20 +2,27 @@ package together.com.homely;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import together.com.homely.utils.PersistenceUtils;
 import together.com.homely.utils.WSUtils;
+import together.com.homely.utils.http.CreateFamilyTask;
+import together.com.homely.utils.http.UploadContentTask;
 
 public class ShareActivity extends ActionBarActivity {
 
@@ -36,11 +43,11 @@ public class ShareActivity extends ActionBarActivity {
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("text/plain".equals(type)) {
                 handleSendText(intent); // Handle text being sent
-            } else if (type.startsWith("image/")) {
+            } else if (type.startsWith("image/") || type.startsWith("video/")) {
                 handleSendImage(intent); // Handle single image being sent
             }
         } else if (Intent.ACTION_SEND_MULTIPLE.equals(action) && type != null) {
-            if (type.startsWith("image/")) {
+            if (type.startsWith("image/") || type.startsWith("video/")) {
                 handleSendMultipleImages(intent); // Handle multiple images being sent
             }
         }
@@ -50,7 +57,11 @@ public class ShareActivity extends ActionBarActivity {
     void handleSendText(Intent intent) {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
         if (sharedText != null) {
-            WSUtils.getInstance().send(persistenceUtils.getFamilyId(), "family", sharedText.getBytes(), "text");
+            String msgType = "text";
+            if(sharedText.startsWith("http")){
+                msgType = "externalLink";
+            }
+            WSUtils.getInstance().send(persistenceUtils.getFamilyId(), "family", sharedText, msgType);
         }
     }
 
@@ -69,12 +80,20 @@ public class ShareActivity extends ActionBarActivity {
                     fis = new FileInputStream(contentUri.getPath());
                 }
 
-                byte[] content = new byte[fis.available()];
-                fis.read(content);
-                WSUtils.getInstance().send(persistenceUtils.getFamilyId(), "family", content, getContentType(contentUri));
+                String contentType = getContentType(contentUri);
+                byte[] content = compressContent(fis, contentType);
+
+                AsyncTask uploadContentMonitor = new UploadContentTask(content, contentType).execute();
+                String contentLocation = (String) uploadContentMonitor.get();
+
+                WSUtils.getInstance().send(persistenceUtils.getFamilyId(), "family", contentLocation, "internalLink");
             }catch (IOException e){
                 e.printStackTrace();
-            }finally {
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } finally {
                 if(fis != null){
                     try {
                         fis.close();
@@ -84,6 +103,23 @@ public class ShareActivity extends ActionBarActivity {
                 }
             }
         }
+    }
+
+    private byte[] compressContent(InputStream fis, String contentType) throws IOException {
+        Bitmap original = BitmapFactory.decodeStream(fis);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Bitmap.CompressFormat compressFormat = null;
+        if("image/jpg".equals(contentType) || "image/jpeg".equals(contentType)){
+            compressFormat = Bitmap.CompressFormat.JPEG;
+        }else if("image/png".equals(contentType)){
+            compressFormat = Bitmap.CompressFormat.PNG;
+        }else {
+            byte[] content = new byte[fis.available()];
+            fis.read(content);
+            return content;
+        }
+        original.compress(compressFormat, 100, out);
+        return out.toByteArray();
     }
 
     void handleSendMultipleImages(Intent intent) {
@@ -99,6 +135,6 @@ public class ShareActivity extends ActionBarActivity {
         ContentResolver cr = this.getContentResolver();
         String mime = cr.getType(uri);
 
-        return mime.split("/")[0];
+        return mime;
     }
 }

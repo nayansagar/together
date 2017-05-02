@@ -11,6 +11,7 @@ import com.together.ws.db.repository.PendingMessagesRepository;
 import com.together.ws.db.repository.RelationshipRepository;
 import com.together.ws.db.repository.UserRepository;
 import com.together.ws.exception.InvalidFamilyException;
+import com.together.ws.utils.FileSystemUtils;
 import com.together.ws.utils.SessionCache;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -39,6 +40,9 @@ public class UserService {
 
     @Autowired
     private SessionCache sessionCache;
+
+    @Autowired
+    private FileSystemUtils fileSystemUtils;
 
     public Map<String, Object> loginUser(String name, String phone){
 
@@ -134,8 +138,12 @@ public class UserService {
         return responseList;
     }
 
-    public void removePendingMessages(String userId) {
-        pendingMessagesRepository.delete(pendingMessagesRepository.findByUserId(userId));
+    public void removePendingMessages(String userId) throws IOException {
+        List<PendingMessage> pendingMessages = pendingMessagesRepository.findByUserId(userId);
+        for(PendingMessage message : pendingMessages){
+            deleteFromContentStore(message.getMessage());
+        }
+        pendingMessagesRepository.delete(pendingMessages);
     }
 
     public String getUserBySessionId(String sessionId) {
@@ -146,13 +154,13 @@ public class UserService {
         return null;
     }
 
-    public void handleMessage(Map message, String sessionId) throws JsonProcessingException {
+    public void handleMessage(Map message, String sessionId) throws IOException {
         String familyId = (String) message.get("family");
         User user = userRepository.findBySessionIdAndFamilyId(sessionId, familyId);
         String msgToSend = createMessageToSend(message, user.getName());
 
         List<User> familyMembers = userRepository.findByFamilyIdAndState(familyId, "JOINED");
-
+        boolean delete = true;
         for(User member : familyMembers){
             if(member.getUserId().equals(user.getUserId())){
                 continue;
@@ -162,17 +170,34 @@ public class UserService {
                 Session session = sessionCache.getSession(member.getSessionId());
                 if(session == null){
                     addPendingMessage(member, user, msgToSend);
+                    delete = false;
                 }else {
                     try {
                         session.getBasicRemote().sendText(msgToSend);
                     } catch (IOException e) {
                         addPendingMessage(member, user, msgToSend);
+                        delete = false;
                     }
                 }
             }else{
                 addPendingMessage(member, user, msgToSend);
+                delete = false;
             }
+        }
 
+        if(delete){
+            deleteFromContentStore((String) message.get("body"));
+        }
+    }
+
+    private void deleteFromContentStore(String body) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> messageMap = objectMapper.readValue(body, Map.class);
+        String msgType = (String) messageMap.get("type");
+        if("internalLink".equals(msgType)){
+            String msgBody = (String) messageMap.get("message");
+            String fileName = msgBody.substring(msgBody.lastIndexOf("/")+1);
+            fileSystemUtils.delete(fileName);
         }
     }
 
@@ -180,7 +205,7 @@ public class UserService {
         String familyId = (String) message.get("family");
         String area = (String) message.get("area");
         String type = (String) message.get("type");
-        String encodedBody = (String)message.get("body");
+        String body = (String)message.get("body");
 
         if(StringUtils.isEmpty(familyId)){
             throw new InvalidFamilyException();
@@ -188,7 +213,7 @@ public class UserService {
 
         Map<String, Object> msgToSend = new HashMap<String, Object>();
         msgToSend.put("family", familyId);
-        msgToSend.put("message", encodedBody);
+        msgToSend.put("message", body);
         msgToSend.put("area", area);
         msgToSend.put("sender", sender);
         msgToSend.put("type", type);

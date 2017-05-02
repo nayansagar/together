@@ -3,10 +3,14 @@ package together.com.homely.adapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -80,9 +84,18 @@ public class MessageListAdapter extends BaseAdapter {
         }
 
         TextView lblFrom = (TextView) convertView.findViewById(R.id.lblMsgFrom);
-        TextView txtMsg = (TextView) convertView.findViewById(R.id.txtMsg);
 
-        txtMsg.setText(new String((byte[])m.get(Constants.DB.MESSAGE)));
+        String messageType = (String) m.get("type");
+        byte[] data = (byte[]) m.get(Constants.DB.MESSAGE);
+        //byte[] decodedData = Base64.decode(data, Base64.DEFAULT);
+        if("text/plain".equals(messageType)){
+            TextView txtMsg = (TextView) convertView.findViewById(R.id.txtMsg);
+            txtMsg.setText(new String(data));
+        }else if(messageType.startsWith("image") || messageType.equals("image")){
+            ImageView imgMsg = (ImageView) convertView.findViewById(R.id.imgMsg);
+            imgMsg.setImageBitmap(BitmapFactory.decodeByteArray(data, 0, data.length));
+        }
+
         lblFrom.setText((String)m.get(Constants.DB.SENDER));
 
         return convertView;

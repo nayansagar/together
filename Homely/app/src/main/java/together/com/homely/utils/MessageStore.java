@@ -27,7 +27,7 @@ public class MessageStore extends SQLiteOpenHelper {
                     Constants.DB.FAMILY + " TEXT," +
                     Constants.DB.AREA + " TEXT," +
                     Constants.DB.SENDER + " TEXT," +
-                    Constants.DB.MESSAGE + " BLOB," +
+                    Constants.DB.MESSAGE + " TEXT," +
                     Constants.DB.SENT_TIME + " TEXT," +
                     Constants.DB.MSG_TYPE + " TEXT" +
             " )";
@@ -56,7 +56,7 @@ public class MessageStore extends SQLiteOpenHelper {
 
     }
 
-    public void storeMessage(String family, String area, String sender, String sentAt, String type, byte[] msgContent) {
+    public void storeMessage(String family, String area, String sender, String sentAt, String type, String msgContent) {
         SQLiteDatabase db = messageStore.getWritableDatabase();
 
         ContentValues values = new ContentValues();

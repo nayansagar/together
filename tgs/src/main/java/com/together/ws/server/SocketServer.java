@@ -83,14 +83,12 @@ public class SocketServer {
 		try {
 			String responseJson = objectMapper.writeValueAsString(messages);
 			session.getBasicRemote().sendText(responseJson);
+			userService.removePendingMessages(userId);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		userService.removePendingMessages(userId);
-
 	}
 
 	/**

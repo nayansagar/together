@@ -67,7 +67,7 @@ public class ChatsFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                WSUtils.getInstance().send(utils.getFamilyId(), "family", inputMsg.getText().toString().getBytes());
+                WSUtils.getInstance().send(utils.getFamilyId(), "family", inputMsg.getText().toString());
                 inputMsg.setText("");
             }
         });

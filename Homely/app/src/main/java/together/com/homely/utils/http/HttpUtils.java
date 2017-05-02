@@ -7,6 +7,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -88,5 +89,16 @@ public class HttpUtils {
         if(httpResponse.getStatusLine().getStatusCode() != 200){
             throw new RuntimeException("Failed to add user to family, status : "+httpResponse.getStatusLine().getStatusCode());
         }
+    }
+
+    public String uploadContent(byte[] content, String contentType) throws IOException {
+        HttpPost httpPost = new HttpPost(hostName+"content");
+        httpPost.setEntity(new ByteArrayEntity(content));
+        httpPost.addHeader("Content-Type", contentType);
+        HttpResponse httpResponse = httpClient.execute(httpPost);
+        if(httpResponse.getStatusLine().getStatusCode() != 201){
+            throw new RuntimeException("Failed to upload content, status : "+httpResponse.getStatusLine().getStatusCode());
+        }
+        return httpResponse.getHeaders("Location")[0].getValue();
     }
 }
