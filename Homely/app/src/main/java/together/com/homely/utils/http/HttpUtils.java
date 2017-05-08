@@ -1,17 +1,25 @@
 package together.com.homely.utils.http;
 
+import android.net.Uri;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -100,5 +108,37 @@ public class HttpUtils {
             throw new RuntimeException("Failed to upload content, status : "+httpResponse.getStatusLine().getStatusCode());
         }
         return httpResponse.getHeaders("Location")[0].getValue();
+    }
+
+    /*public String uploadContentMultipart(Uri contentUri, String contentType) throws IOException {
+        HttpPost httpPost = new HttpPost(hostName+"content");
+        FileBody filebodyVideo = new FileBody(new File(contentUri.getPath()), contentType, "any");
+        MultipartEntityBuilder reqEntityBuilder = MultipartEntityBuilder.create();
+        reqEntityBuilder.addPart("videoFile", filebodyVideo);
+        httpPost.setEntity(reqEntityBuilder.build());
+        HttpResponse httpResponse = httpClient.execute(httpPost);
+        if(httpResponse.getStatusLine().getStatusCode() != 201){
+            throw new RuntimeException("Failed to upload content, status : "+httpResponse.getStatusLine().getStatusCode());
+        }
+        return httpResponse.getHeaders("Location")[0].getValue();
+    }*/
+
+
+
+    public byte[] downloadContent(String contentId) throws IOException {
+        ByteArrayOutputStream baos = null;
+        try{
+            HttpGet httpGet = new HttpGet(hostName+contentId);
+            HttpResponse httpResponse = httpClient.execute(httpGet);
+            if(httpResponse.getStatusLine().getStatusCode() != 200){
+                throw new RuntimeException("Failed to download content, status : "+httpResponse.getStatusLine().getStatusCode());
+            }
+            baos = new ByteArrayOutputStream();
+            httpResponse.getEntity().writeTo(baos);
+            return baos.toByteArray();
+        }finally {
+            baos.close();
+        }
+
     }
 }

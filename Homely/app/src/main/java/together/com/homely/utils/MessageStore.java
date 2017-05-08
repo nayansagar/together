@@ -88,7 +88,7 @@ public class MessageStore extends SQLiteOpenHelper {
                 values.put(Constants.DB.SENDER, cursor.getString(3));
                 values.put(Constants.DB.SENT_TIME, cursor.getString(5));
                 values.put(Constants.DB.MSG_TYPE, cursor.getString(6));
-                values.put(Constants.DB.MESSAGE, cursor.getBlob(4));
+                values.put(Constants.DB.MESSAGE, cursor.getString(4));
                 // Adding contact to list
                 messagesList.add(values);
             } while (cursor.moveToNext());

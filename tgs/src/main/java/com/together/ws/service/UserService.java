@@ -157,8 +157,9 @@ public class UserService {
     public void handleMessage(Map message, String sessionId) throws IOException {
         String familyId = (String) message.get("family");
         User user = userRepository.findBySessionIdAndFamilyId(sessionId, familyId);
-        String msgToSend = createMessageToSend(message, user.getName());
-
+        enhanceMessage(message, user.getName());
+        ObjectMapper objectMapper = new ObjectMapper();
+        String msgToSend = objectMapper.writeValueAsString(message);
         List<User> familyMembers = userRepository.findByFamilyIdAndState(familyId, "JOINED");
         boolean delete = true;
         for(User member : familyMembers){
@@ -186,42 +187,28 @@ public class UserService {
         }
 
         if(delete){
-            deleteFromContentStore((String) message.get("body"));
+            deleteFromContentStore(message);
         }
     }
 
-    private void deleteFromContentStore(String body) throws IOException {
+    private void deleteFromContentStore(String message) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> messageMap = objectMapper.readValue(body, Map.class);
+        Map messageMap = objectMapper.readValue(message, Map.class);
+        deleteFromContentStore(messageMap);
+    }
+
+    private void deleteFromContentStore(Map messageMap) throws IOException {
         String msgType = (String) messageMap.get("type");
         if("internalLink".equals(msgType)){
-            String msgBody = (String) messageMap.get("message");
+            String msgBody = (String) messageMap.get("body");
             String fileName = msgBody.substring(msgBody.lastIndexOf("/")+1);
             fileSystemUtils.delete(fileName);
         }
     }
 
-    private String createMessageToSend(Map message, String sender) throws JsonProcessingException {
-        String familyId = (String) message.get("family");
-        String area = (String) message.get("area");
-        String type = (String) message.get("type");
-        String body = (String)message.get("body");
-
-        if(StringUtils.isEmpty(familyId)){
-            throw new InvalidFamilyException();
-        }
-
-        Map<String, Object> msgToSend = new HashMap<String, Object>();
-        msgToSend.put("family", familyId);
-        msgToSend.put("message", body);
-        msgToSend.put("area", area);
-        msgToSend.put("sender", sender);
-        msgToSend.put("type", type);
-        msgToSend.put("sentAt", DateTime.now().withZone(DateTimeZone.UTC).toString());
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String msgStringToSend = objectMapper.writeValueAsString(msgToSend);
-        return msgStringToSend;
+    private void enhanceMessage(Map message, String sender) throws JsonProcessingException {
+        message.put("sender", sender);
+        message.put("sentAt", DateTime.now().withZone(DateTimeZone.UTC).toString());
     }
 
     private void addPendingMessage(User member, User sender, String message) {

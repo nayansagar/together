@@ -54,7 +54,7 @@ public class WSUtils extends WebSocketClient {
     public void onMessage(String message) {
         try {
             Map<String, Object> messageMap = OBJECT_MAPPER.readValue(message, Map.class);
-            String msgContent = (String) messageMap.get("message");
+            String msgContent = (String) messageMap.get("body");
             MessageStore.getInstance().storeMessage(
                     (String)messageMap.get("family"),
                     (String)messageMap.get("area"),
@@ -70,14 +70,7 @@ public class WSUtils extends WebSocketClient {
         }
     }
 
-    public void send(String family, String area, String body){
-        send(family, area, body, "text");
-    }
-
     public void send(String family, String area, String body, String messageType){
-
-        MessageStore.getInstance().storeMessage(family, area, "self",
-                GregorianCalendar.getInstance().toString(), messageType, body);
 
         Map<String, Object> message = new HashMap<String, Object>();
         message.put("family", family);

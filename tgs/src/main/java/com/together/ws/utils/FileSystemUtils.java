@@ -50,7 +50,8 @@ public class FileSystemUtils {
     }
 
     public void delete(String fileName){
-        File file = new File(fileName);
+        String filePath = EnvironmentUtils.getContentStorePath() + "/" + fileName;
+        File file = new File(filePath);
         if(file.exists()){
             file.delete();
         }

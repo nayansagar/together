@@ -34,8 +34,8 @@ public class ContentController {
         return ResponseEntity.created(URI.create("/content/"+location)).build();
     }
 
-    @RequestMapping(path = "/{contentId}", method = RequestMethod.GET)
-    public ResponseEntity<?> getContent(@PathParam("contentId") String contentId){
+    @RequestMapping(path = "/{contentId:.+}", method = RequestMethod.GET)
+    public ResponseEntity<?> getContent(@PathVariable("contentId") String contentId){
         Content content = contentService.getContent(contentId);
         HttpHeaders headers = new HttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, Arrays.asList(content.getType()));

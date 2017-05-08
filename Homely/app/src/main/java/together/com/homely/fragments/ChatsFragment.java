@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import together.com.homely.R;
 import together.com.homely.adapter.MessageListAdapter;
 import together.com.homely.utils.JSONUtils;
 import together.com.homely.utils.MessageListAdapterCache;
+import together.com.homely.utils.MessageStore;
 import together.com.homely.utils.PersistenceUtils;
 import together.com.homely.utils.WSUtils;
 
@@ -67,7 +69,15 @@ public class ChatsFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                WSUtils.getInstance().send(utils.getFamilyId(), "family", inputMsg.getText().toString());
+                String body = inputMsg.getText().toString();
+                String msgType = "text";
+                if(body.startsWith("http")){
+                    msgType = "externalLink";
+                }
+                MessageStore.getInstance().storeMessage(utils.getFamilyId(), "family", "self",
+                        GregorianCalendar.getInstance().toString(), msgType, body);
+
+                WSUtils.getInstance().send(utils.getFamilyId(), "family", body, msgType);
                 inputMsg.setText("");
             }
         });

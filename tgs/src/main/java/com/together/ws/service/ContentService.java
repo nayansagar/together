@@ -42,6 +42,7 @@ public class ContentService {
             case "gif" : return "image/gif";
             case "mp4" : return "video/mp4";
             case "mp3" : return "video/mpeg";
+            case "mpeg" : return "video/mpeg";
             default: throw new RuntimeException("unsupported file type");
         }
     }

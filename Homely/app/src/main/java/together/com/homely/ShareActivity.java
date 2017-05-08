@@ -17,8 +17,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.concurrent.ExecutionException;
 
+import together.com.homely.utils.FileSystemUtils;
+import together.com.homely.utils.MessageStore;
 import together.com.homely.utils.PersistenceUtils;
 import together.com.homely.utils.WSUtils;
 import together.com.homely.utils.http.CreateFamilyTask;
@@ -61,6 +64,8 @@ public class ShareActivity extends ActionBarActivity {
             if(sharedText.startsWith("http")){
                 msgType = "externalLink";
             }
+            MessageStore.getInstance().storeMessage(persistenceUtils.getFamilyId(), "family", "self",
+                    GregorianCalendar.getInstance().toString(), msgType, sharedText);
             WSUtils.getInstance().send(persistenceUtils.getFamilyId(), "family", sharedText, msgType);
         }
     }
@@ -85,8 +90,15 @@ public class ShareActivity extends ActionBarActivity {
 
                 AsyncTask uploadContentMonitor = new UploadContentTask(content, contentType).execute();
                 String contentLocation = (String) uploadContentMonitor.get();
+                if(contentType.startsWith("video")){
+                    FileSystemUtils.getInstance().createVideoFile(getFileName(contentLocation), content);
+                }else {
+                    FileSystemUtils.getInstance().createImageFile(getFileName(contentLocation), content);
+                }
 
-                WSUtils.getInstance().send(persistenceUtils.getFamilyId(), "family", contentLocation, "internalLink");
+                MessageStore.getInstance().storeMessage(persistenceUtils.getFamilyId(), "family", "self",
+                        GregorianCalendar.getInstance().toString(), contentType, contentLocation);
+                WSUtils.getInstance().send(persistenceUtils.getFamilyId(), "family", contentLocation, contentType);
             }catch (IOException e){
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -105,21 +117,28 @@ public class ShareActivity extends ActionBarActivity {
         }
     }
 
+    private String getFileName(String contentLocation) {
+        return contentLocation.split("/")[2];
+    }
+
     private byte[] compressContent(InputStream fis, String contentType) throws IOException {
-        Bitmap original = BitmapFactory.decodeStream(fis);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Bitmap.CompressFormat compressFormat = null;
+
         if("image/jpg".equals(contentType) || "image/jpeg".equals(contentType)){
-            compressFormat = Bitmap.CompressFormat.JPEG;
+            Bitmap original = BitmapFactory.decodeStream(fis);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            original.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            return out.toByteArray();
         }else if("image/png".equals(contentType)){
-            compressFormat = Bitmap.CompressFormat.PNG;
+            Bitmap original = BitmapFactory.decodeStream(fis);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            original.compress(Bitmap.CompressFormat.PNG, 100, out);
+            return out.toByteArray();
         }else {
             byte[] content = new byte[fis.available()];
             fis.read(content);
             return content;
         }
-        original.compress(compressFormat, 100, out);
-        return out.toByteArray();
+
     }
 
     void handleSendMultipleImages(Intent intent) {
