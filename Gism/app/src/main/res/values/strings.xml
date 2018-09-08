@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">Gism</string>
+
+    <string name="facebook_app_id">2113717845305073</string>
+    <string name="fb_login_protocol_scheme">fb2113717845305073</string>
+    <string name="login_with_facebook">Login with Facebook</string>
+    <string name="title_activity_signup">SignupActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="user_identity">Phone Number</string>
+    <string name="next">Next</string>
+    <string name="user_name">Name</string>
+    <string name="title_activity_create_family">CreateFamilyActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_join_family">JoinFamilyActivity</string>
+    <string name="create_group_header">Add members</string>
+    <string name="relationship_prompt">Relationship</string>
+    <string name="family_name_header">Name your Group</string>
+    <string name="family_name_hint">Group name</string>
+    <string name="phone_number">Phone number</string>
+    <string name="group_type">Select group type</string>
+    <string name="invite_message" formatted="false">Hi %s, Join our group "%s" on Gism at %s, use join code %s</string>
+
+    <string name="title_activity_family_home">FamilyHomeActivity</string>
+    <string name="spouse">Add Member</string>
+    <string name="father">Father</string>
+    <string name="mother">Mother</string>
+    <string name="son">Son</string>
+    <string name="daughter">Daughter</string>
+    <string name="brother">Brother</string>
+    <string name="sister">Sister</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pending_invites">Pending invites</string>
+    <string name="btn_send">Send</string>
+    <string name="title_activity_share">ShareActivity</string>
+    <string name="wall">Wall</string>
+    <string name="family">Family</string>
+
+    <string-array name="group_types">
+        <item>Friends</item>
+        <item>Colleagues</item>
+        <item>Travel</item>
+        <item>Cousins</item>
+        <item>Family</item>
+        <item>Couple</item>
+    </string-array>
+    <string name="title_activity_web_view">WebViewActivity</string>
+</resources>

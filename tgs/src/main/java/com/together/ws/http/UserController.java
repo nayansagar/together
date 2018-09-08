@@ -1,7 +1,7 @@
 package com.together.ws.http;
 
 import com.together.ws.exception.InvalidFamilyException;
-import com.together.ws.service.FamilyService;
+import com.together.ws.service.GroupService;
 import com.together.ws.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private FamilyService familyService;
+    private GroupService groupService;
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> createUser(@RequestBody Map<String, String> userData){
@@ -49,7 +49,7 @@ public class UserController {
             return new ResponseEntity("Missing mandatory field name", HttpStatus.BAD_REQUEST);
         }
 
-        String familyId = familyService.createFamily(familyName);
+        String familyId = groupService.createFamily(familyName);
         userService.joinFamily(userId, familyId);
         userService.inviteUsersToFamily(userId, familyId, memberInfo);
 

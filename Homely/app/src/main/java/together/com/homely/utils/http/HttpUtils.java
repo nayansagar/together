@@ -35,7 +35,7 @@ public class HttpUtils {
 
     private static HttpClient httpClient = new DefaultHttpClient();
 
-    private static final String hostName = "http://192.168.1.8:8080/";
+    private static final String hostName = "http://192.168.56.1:8080/";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

@@ -23,7 +23,7 @@ import java.util.Map;
 public class WSUtils extends WebSocketClient {
 
     private static WSUtils wsUtils;
-    private static String wsEndpoint = "ws://192.168.1.8:8080/chat?user_id=";
+    private static String wsEndpoint = "ws://192.168.56.1:8080/chat?user_id=";
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private WSUtils(URI serverURI) {

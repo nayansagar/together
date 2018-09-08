@@ -30,7 +30,7 @@ public class FamilyHomeActivity extends ActionBarActivity implements ActionBar.T
     private ActionBar actionBar;
     private PersistenceUtils persistenceUtils;
     // Tab titles
-    private String[] tabs = { "Feed", "Chats", "Apps" };
+    private String[] tabs = { "Chats", "Feed", "Apps" };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

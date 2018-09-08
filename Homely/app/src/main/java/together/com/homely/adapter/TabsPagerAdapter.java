@@ -21,9 +21,9 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return new FeedFragment();
-            case 1:
                 return new ChatsFragment();
+            case 1:
+                return new FeedFragment();
             case 2:
                 return new AppsFragment();
         }

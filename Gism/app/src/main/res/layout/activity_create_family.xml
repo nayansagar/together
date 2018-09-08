@@ -1,0 +1,66 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="gism.com.gism.CreateFamilyActivity">
+
+    <TextView
+        android:id="@+id/name_family_text"
+        android:text="@string/family_name_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/family_name"
+        android:hint="@string/family_name_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/name_family_text"/>
+
+    <Spinner
+        android:id="@+id/group_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/group_types"
+        android:prompt="@string/group_type"
+        android:layout_below="@id/family_name"/>
+
+    <TextView
+        android:id="@+id/add_members_text"
+        android:text="@string/create_group_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/group_type"/>
+
+    <ListView
+        android:id="@+id/invites_sent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawSelectorOnTop="false"
+        android:layout_below="@id/add_members_text"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/spouse"
+        android:id="@+id/invite_member"
+        android:textColor="#1e8eb8"
+        android:onClick="inviteContact"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/invites_sent"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/next"
+        android:id="@+id/action_next"
+        android:textColor="#1e8eb8"
+        android:onClick="uploadInvites"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/invite_member"
+        />
+</RelativeLayout>
